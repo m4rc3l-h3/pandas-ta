@@ -25,7 +25,7 @@ def increasing(close, length=None, strict=None, asint=None, percent=None, drift=
         increasing.fillna(0, inplace=True)
         increasing = increasing.astype(bool)
     else:
-        increasing = close_.diff(length) > 0
+        increasing = close > close_.shift(drift)
 
     if asint:
         increasing = increasing.astype(int)

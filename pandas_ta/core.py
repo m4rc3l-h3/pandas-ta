@@ -657,6 +657,7 @@ class AnalysisIndicators(BasePandasObject):
             "td_seq", # Performance exclusion
             "tsignals",
             "vp",
+            "vp_extended"
             "xsignals",
         ]
 
@@ -1751,4 +1752,10 @@ class AnalysisIndicators(BasePandasObject):
         close = self._get_column(kwargs.pop("close", "close"))
         volume = self._get_column(kwargs.pop("volume", "volume"))
         result = vp(close=close, volume=volume, width=width, percent=percent, **kwargs)
+        return self._post_process(result, **kwargs)
+
+    def vp_extended(self, period=None, percent=None, **kwargs):
+        close = self._get_column(kwargs.pop("close", "close"))
+        volume = self._get_column(kwargs.pop("volume", "volume"))
+        result = vp_extended(close=close, volume=volume, period=period, percent=percent, **kwargs)
         return self._post_process(result, **kwargs)

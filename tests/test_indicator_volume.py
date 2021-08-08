@@ -4,6 +4,7 @@ from .context import pandas_ta
 from unittest import TestCase, skip
 import pandas.testing as pdt
 from pandas import DataFrame, Series
+import numpy as np
 
 import talib as tal
 
@@ -174,3 +175,275 @@ class TestVolume(TestCase):
         result = pandas_ta.vp(self.close, self.volume_)
         self.assertIsInstance(result, DataFrame)
         self.assertEqual(result.name, "VP_10")
+
+    def test_vp_extended_dual_volume(self):
+        """Volume Profile for dual volume"""
+        df = pandas_ta.vp_extended(self.data[:30])
+
+        """
+        Expected Result Table:
+        	Lower Price	Upper Price	Total Vol	Mean Price			
+        0	134.583	    135.519	    13739200	135.04685			PL
+        1	135.519	    136.444	    4006500	    135.56250			
+        2	136.444	    137.369	    12441200	136.61715			
+        3	137.369	    138.294	    18486300	137.86457			
+        4	138.294	    139.219	    4794100	    138.50000			
+        5	139.219	    140.144	    21672400	139.70310	    2	VAL
+        6	140.144	    141.069	    18940200	140.68747	    2	
+        7	141.069	    141.994	    58089900	141.51734	    1	POC
+        8	141.994	    142.919	    20828200	142.49998	    3	
+        9	142.919	    143.844	    10045400	143.84370	    3	VAH/PH
+        """
+        """
+        Columns:
+        ['price_low', 'price_mean', 'price_high', 'volume_total', 'volume_neg',
+       'volume_pos', 'position', 'profile_low', 'profile_high',
+       'point_of_control', 'value_area_low', 'value_area_high']
+        """
+        
+        self.assertEquals(df['price_low'][0],134.583)
+        self.assertEquals(df['price_low'][1],135.519)
+        self.assertEquals(df['price_low'][2],136.444)
+        self.assertEquals(df['price_low'][3],137.369)
+        self.assertEquals(df['price_low'][4],138.294)
+        self.assertEquals(df['price_low'][5],139.219)
+        self.assertEquals(df['price_low'][6],140.144)
+        self.assertEquals(df['price_low'][7],141.069)
+        self.assertEquals(df['price_low'][8],141.994)
+        self.assertEquals(df['price_low'][9],142.919)
+
+        self.assertEquals(df['price_high'][0],135.519)
+        self.assertEquals(df['price_high'][1],136.444)
+        self.assertEquals(df['price_high'][2],137.369)
+        self.assertEquals(df['price_high'][3],138.294)
+        self.assertEquals(df['price_high'][4],139.219)
+        self.assertEquals(df['price_high'][5],140.144)
+        self.assertEquals(df['price_high'][6],141.069)
+        self.assertEquals(df['price_high'][7],141.994)
+        self.assertEquals(df['price_high'][8],142.919)
+        self.assertEquals(df['price_high'][9],143.844)
+
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][0])),135.04685)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][1])),135.56250)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][2])),136.61715)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][3])),137.86457)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][4])),138.50000)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][5])),139.70310)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][6])),140.68747)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][7])),141.51734)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][8])),142.49998)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][9])),143.84370)
+
+        self.assertEquals(df['volume_total'][0],13739200)
+        self.assertEquals(df['volume_total'][1],4006500)
+        self.assertEquals(df['volume_total'][2],12441200)
+        self.assertEquals(df['volume_total'][3],18486300)
+        self.assertEquals(df['volume_total'][4],4794100)
+        self.assertEquals(df['volume_total'][5],21672400)
+        self.assertEquals(df['volume_total'][6],18940200)
+        self.assertEquals(df['volume_total'][7],58089900)
+        self.assertEquals(df['volume_total'][8],20828200)
+        self.assertEquals(df['volume_total'][9],10045400)
+
+        self.assertTrue(np.isnan(df['position'][0]))
+        self.assertTrue(np.isnan(df['position'][1]))
+        self.assertTrue(np.isnan(df['position'][2]))
+        self.assertTrue(np.isnan(df['position'][3]))
+        self.assertTrue(np.isnan(df['position'][4]))
+        self.assertEquals(df['position'][5],2)
+        self.assertEquals(df['position'][6],2)
+        self.assertEquals(df['position'][7],1)
+        self.assertEquals(df['position'][8],3)
+        self.assertEquals(df['position'][9],3)
+
+        self.assertEquals(df['profile_low'][0],1)
+        self.assertEquals(df['profile_low'][1],0)
+        self.assertEquals(df['profile_low'][2],0)
+        self.assertEquals(df['profile_low'][3],0)
+        self.assertEquals(df['profile_low'][4],0)
+        self.assertEquals(df['profile_low'][5],0)
+        self.assertEquals(df['profile_low'][6],0)
+        self.assertEquals(df['profile_low'][7],0)
+        self.assertEquals(df['profile_low'][8],0)
+        self.assertEquals(df['profile_low'][9],0)
+
+        self.assertEquals(df['profile_high'][0],0)
+        self.assertEquals(df['profile_high'][1],0)
+        self.assertEquals(df['profile_high'][2],0)
+        self.assertEquals(df['profile_high'][3],0)
+        self.assertEquals(df['profile_high'][4],0)
+        self.assertEquals(df['profile_high'][5],0)
+        self.assertEquals(df['profile_high'][6],0)
+        self.assertEquals(df['profile_high'][7],0)
+        self.assertEquals(df['profile_high'][8],0)
+        self.assertEquals(df['profile_high'][9],1)
+
+        self.assertEquals(df['point_of_control'][0],0)
+        self.assertEquals(df['point_of_control'][1],0)
+        self.assertEquals(df['point_of_control'][2],0)
+        self.assertEquals(df['point_of_control'][3],0)
+        self.assertEquals(df['point_of_control'][4],0)
+        self.assertEquals(df['point_of_control'][5],0)
+        self.assertEquals(df['point_of_control'][6],0)
+        self.assertEquals(df['point_of_control'][7],1)
+        self.assertEquals(df['point_of_control'][8],0)
+        self.assertEquals(df['point_of_control'][9],0)
+
+        self.assertEquals(df['value_area_low'][0],0)
+        self.assertEquals(df['value_area_low'][1],0)
+        self.assertEquals(df['value_area_low'][2],0)
+        self.assertEquals(df['value_area_low'][3],0)
+        self.assertEquals(df['value_area_low'][4],0)
+        self.assertEquals(df['value_area_low'][5],1)
+        self.assertEquals(df['value_area_low'][6],0)
+        self.assertEquals(df['value_area_low'][7],0)
+        self.assertEquals(df['value_area_low'][8],0)
+        self.assertEquals(df['value_area_low'][9],0)
+
+        self.assertEquals(df['value_area_high'][0],0)
+        self.assertEquals(df['value_area_high'][1],0)
+        self.assertEquals(df['value_area_high'][2],0)
+        self.assertEquals(df['value_area_high'][3],0)
+        self.assertEquals(df['value_area_high'][4],0)
+        self.assertEquals(df['value_area_high'][5],0)
+        self.assertEquals(df['value_area_high'][6],0)
+        self.assertEquals(df['value_area_high'][7],0)
+        self.assertEquals(df['value_area_high'][8],0)
+        self.assertEquals(df['value_area_high'][9],1)
+
+    def test_vp_extended_single_volume(self):
+        """Volume Profile for single volume"""
+        df = pandas_ta.vp_extended(self.data[:30], nr_volumes=1)
+
+        """
+        Expected Result Table:
+        	Lower Price	Upper Price	Total Vol	Mean Price			
+        0	134.583	    135.519	    13739200	135.04685			PL
+        1	135.519	    136.444	    4006500	    135.56250			
+        2	136.444	    137.369	    12441200	136.61715			
+        3	137.369	    138.294	    18486300	137.86457			
+        4	138.294	    139.219	    4794100	    138.50000			
+        5	139.219	    140.144	    21672400	139.70310	    4	VAL
+        6	140.144	    141.069	    18940200	140.68747	    3	
+        7	141.069	    141.994	    58089900	141.51734	    1	POC
+        8	141.994	    142.919	    20828200	142.49998	    2	
+        9	142.919	    143.844	    10045400	143.84370	    5	VAH/PH
+        """
+        """
+        Columns:
+        ['price_low', 'price_mean', 'price_high', 'volume_total', 'volume_neg',
+       'volume_pos', 'position', 'profile_low', 'profile_high',
+       'point_of_control', 'value_area_low', 'value_area_high']
+        """
+        
+        print(df.head(10))
+
+        self.assertEquals(df['price_low'][0],134.583)
+        self.assertEquals(df['price_low'][1],135.519)
+        self.assertEquals(df['price_low'][2],136.444)
+        self.assertEquals(df['price_low'][3],137.369)
+        self.assertEquals(df['price_low'][4],138.294)
+        self.assertEquals(df['price_low'][5],139.219)
+        self.assertEquals(df['price_low'][6],140.144)
+        self.assertEquals(df['price_low'][7],141.069)
+        self.assertEquals(df['price_low'][8],141.994)
+        self.assertEquals(df['price_low'][9],142.919)
+
+        self.assertEquals(df['price_high'][0],135.519)
+        self.assertEquals(df['price_high'][1],136.444)
+        self.assertEquals(df['price_high'][2],137.369)
+        self.assertEquals(df['price_high'][3],138.294)
+        self.assertEquals(df['price_high'][4],139.219)
+        self.assertEquals(df['price_high'][5],140.144)
+        self.assertEquals(df['price_high'][6],141.069)
+        self.assertEquals(df['price_high'][7],141.994)
+        self.assertEquals(df['price_high'][8],142.919)
+        self.assertEquals(df['price_high'][9],143.844)
+
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][0])),135.04685)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][1])),135.56250)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][2])),136.61715)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][3])),137.86457)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][4])),138.50000)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][5])),139.70310)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][6])),140.68747)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][7])),141.51734)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][8])),142.49998)
+        self.assertEquals(float("{:.5f}".format(df['price_mean'][9])),143.84370)
+
+        self.assertEquals(df['volume_total'][0],13739200)
+        self.assertEquals(df['volume_total'][1],4006500)
+        self.assertEquals(df['volume_total'][2],12441200)
+        self.assertEquals(df['volume_total'][3],18486300)
+        self.assertEquals(df['volume_total'][4],4794100)
+        self.assertEquals(df['volume_total'][5],21672400)
+        self.assertEquals(df['volume_total'][6],18940200)
+        self.assertEquals(df['volume_total'][7],58089900)
+        self.assertEquals(df['volume_total'][8],20828200)
+        self.assertEquals(df['volume_total'][9],10045400)
+
+        self.assertTrue(np.isnan(df['position'][0]))
+        self.assertTrue(np.isnan(df['position'][1]))
+        self.assertTrue(np.isnan(df['position'][2]))
+        self.assertTrue(np.isnan(df['position'][3]))
+        self.assertTrue(np.isnan(df['position'][4]))
+        self.assertEquals(df['position'][5],4)
+        self.assertEquals(df['position'][6],3)
+        self.assertEquals(df['position'][7],1)
+        self.assertEquals(df['position'][8],2)
+        self.assertEquals(df['position'][9],5)
+
+        self.assertEquals(df['profile_low'][0],1)
+        self.assertEquals(df['profile_low'][1],0)
+        self.assertEquals(df['profile_low'][2],0)
+        self.assertEquals(df['profile_low'][3],0)
+        self.assertEquals(df['profile_low'][4],0)
+        self.assertEquals(df['profile_low'][5],0)
+        self.assertEquals(df['profile_low'][6],0)
+        self.assertEquals(df['profile_low'][7],0)
+        self.assertEquals(df['profile_low'][8],0)
+        self.assertEquals(df['profile_low'][9],0)
+
+        self.assertEquals(df['profile_high'][0],0)
+        self.assertEquals(df['profile_high'][1],0)
+        self.assertEquals(df['profile_high'][2],0)
+        self.assertEquals(df['profile_high'][3],0)
+        self.assertEquals(df['profile_high'][4],0)
+        self.assertEquals(df['profile_high'][5],0)
+        self.assertEquals(df['profile_high'][6],0)
+        self.assertEquals(df['profile_high'][7],0)
+        self.assertEquals(df['profile_high'][8],0)
+        self.assertEquals(df['profile_high'][9],1)
+
+        self.assertEquals(df['point_of_control'][0],0)
+        self.assertEquals(df['point_of_control'][1],0)
+        self.assertEquals(df['point_of_control'][2],0)
+        self.assertEquals(df['point_of_control'][3],0)
+        self.assertEquals(df['point_of_control'][4],0)
+        self.assertEquals(df['point_of_control'][5],0)
+        self.assertEquals(df['point_of_control'][6],0)
+        self.assertEquals(df['point_of_control'][7],1)
+        self.assertEquals(df['point_of_control'][8],0)
+        self.assertEquals(df['point_of_control'][9],0)
+
+        self.assertEquals(df['value_area_low'][0],0)
+        self.assertEquals(df['value_area_low'][1],0)
+        self.assertEquals(df['value_area_low'][2],0)
+        self.assertEquals(df['value_area_low'][3],0)
+        self.assertEquals(df['value_area_low'][4],0)
+        self.assertEquals(df['value_area_low'][5],1)
+        self.assertEquals(df['value_area_low'][6],0)
+        self.assertEquals(df['value_area_low'][7],0)
+        self.assertEquals(df['value_area_low'][8],0)
+        self.assertEquals(df['value_area_low'][9],0)
+
+        self.assertEquals(df['value_area_high'][0],0)
+        self.assertEquals(df['value_area_high'][1],0)
+        self.assertEquals(df['value_area_high'][2],0)
+        self.assertEquals(df['value_area_high'][3],0)
+        self.assertEquals(df['value_area_high'][4],0)
+        self.assertEquals(df['value_area_high'][5],0)
+        self.assertEquals(df['value_area_high'][6],0)
+        self.assertEquals(df['value_area_high'][7],0)
+        self.assertEquals(df['value_area_high'][8],0)
+        self.assertEquals(df['value_area_high'][9],1)
